@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HR Intelligence Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+:root {
+  --navy: #0A1628;
+  --navy2: #112240;
+  --blue: #1D4ED8;
+  --blue-light: #3B82F6;
+  --cyan: #06B6D4;
+  --gold: #F59E0B;
+  --red: #EF4444;
+  --green: #10B981;
+  --white: #F8FAFF;
+  --gray: #94A3B8;
+  --card: rgba(255,255,255,0.04);
+  --border: rgba(255,255,255,0.08);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--navy);color:var(--white);font-family:'DM Sans',sans-serif;font-size:15px;line-height:1.6;overflow-x:hidden}
+
+/* BG */
+.bg-grid{position:fixed;inset:0;background-image:linear-gradient(rgba(29,78,216,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(29,78,216,.06) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;z-index:0}
+.bg-glow{position:fixed;top:-200px;right:-200px;width:600px;height:600px;background:radial-gradient(circle,rgba(6,182,212,.12) 0%,transparent 70%);pointer-events:none;z-index:0}
+.bg-glow2{position:fixed;bottom:-200px;left:-100px;width:500px;height:500px;background:radial-gradient(circle,rgba(29,78,216,.1) 0%,transparent 70%);pointer-events:none;z-index:0}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(10,22,40,.85);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:0 48px;display:flex;align-items:center;justify-content:space-between;height:64px}
+.nav-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:18px;letter-spacing:-.5px;display:flex;align-items:center;gap:10px}
+.nav-logo span{color:var(--cyan)}
+.nav-dot{width:8px;height:8px;background:var(--cyan);border-radius:50%;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}
+.nav-links{display:flex;gap:32px}
+.nav-links a{color:var(--gray);text-decoration:none;font-size:13px;font-weight:500;letter-spacing:.03em;transition:.2s;text-transform:uppercase}
+.nav-links a:hover{color:var(--white)}
+.nav-badge{background:linear-gradient(135deg,var(--blue),var(--cyan));padding:6px 16px;border-radius:20px;font-size:12px;font-weight:600;letter-spacing:.05em}
+
+/* SECTIONS */
+section{position:relative;z-index:1;padding:80px 48px}
+.container{max-width:1200px;margin:0 auto}
+
+/* HERO */
+#hero{padding-top:140px;padding-bottom:80px;min-height:100vh;display:flex;align-items:center}
+.hero-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(6,182,212,.12);border:1px solid rgba(6,182,212,.25);padding:6px 16px;border-radius:20px;font-size:12px;color:var(--cyan);font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-bottom:28px}
+.hero-title{font-family:'Syne',sans-serif;font-size:clamp(40px,6vw,76px);font-weight:800;line-height:1.05;letter-spacing:-2px;margin-bottom:24px}
+.hero-title .line2{color:var(--cyan)}
+.hero-subtitle{font-size:18px;color:var(--gray);max-width:580px;font-weight:300;line-height:1.7;margin-bottom:48px}
+.hero-stats{display:flex;gap:48px;margin-bottom:48px;flex-wrap:wrap}
+.hstat{border-left:2px solid var(--cyan);padding-left:16px}
+.hstat-num{font-family:'Syne',sans-serif;font-size:36px;font-weight:800;color:var(--white);line-height:1}
+.hstat-num span{color:var(--cyan);font-size:24px}
+.hstat-label{font-size:12px;color:var(--gray);text-transform:uppercase;letter-spacing:.08em;margin-top:4px}
+.hero-cta{display:flex;gap:16px;flex-wrap:wrap}
+.btn-primary{background:linear-gradient(135deg,var(--blue),var(--cyan));color:#fff;padding:14px 32px;border-radius:8px;font-size:14px;font-weight:600;text-decoration:none;letter-spacing:.03em;transition:.3s;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:8px}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 12px 40px rgba(29,78,216,.4)}
+.btn-outline{background:transparent;color:var(--white);padding:14px 32px;border-radius:8px;font-size:14px;font-weight:600;text-decoration:none;letter-spacing:.03em;transition:.3s;border:1px solid var(--border);display:inline-flex;align-items:center;gap:8px}
+.btn-outline:hover{border-color:var(--cyan);color:var(--cyan)}
+.hero-visual{position:relative;flex-shrink:0}
+.hero-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;backdrop-filter:blur(20px);width:320px}
+.hero-card-title{font-size:11px;color:var(--gray);text-transform:uppercase;letter-spacing:.1em;margin-bottom:16px}
+.mini-bar{display:flex;flex-direction:column;gap:10px}
+.mbar-row{display:flex;align-items:center;gap:10px}
+.mbar-label{font-size:12px;color:var(--gray);width:100px;flex-shrink:0}
+.mbar-track{flex:1;height:6px;background:rgba(255,255,255,.08);border-radius:3px;overflow:hidden}
+.mbar-fill{height:100%;border-radius:3px;animation:fillBar 1.5s ease forwards}
+@keyframes fillBar{from{width:0}}
+.mbar-val{font-size:12px;font-weight:600;width:36px;text-align:right}
+.hero-layout{display:flex;gap:64px;align-items:center;flex-wrap:wrap}
+.hero-content{flex:1;min-width:300px}
+
+/* SECTION HEADERS */
+.sec-label{font-size:11px;color:var(--cyan);font-weight:600;letter-spacing:.12em;text-transform:uppercase;margin-bottom:12px}
+.sec-title{font-family:'Syne',sans-serif;font-size:clamp(28px,4vw,44px);font-weight:800;letter-spacing:-1px;line-height:1.1;margin-bottom:16px}
+.sec-desc{color:var(--gray);font-size:16px;max-width:600px;font-weight:300;line-height:1.7;margin-bottom:48px}
+
+/* PROBLEMS */
+.problems-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px}
+.prob-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px;position:relative;overflow:hidden;transition:.3s;cursor:default}
+.prob-card:hover{border-color:rgba(255,255,255,.15);transform:translateY(-4px);background:rgba(255,255,255,.06)}
+.prob-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;border-radius:16px 16px 0 0}
+.prob-card.red::before{background:linear-gradient(90deg,var(--red),#F97316)}
+.prob-card.gold::before{background:linear-gradient(90deg,var(--gold),#FCD34D)}
+.prob-card.blue::before{background:linear-gradient(90deg,var(--blue-light),var(--cyan))}
+.prob-card.purple::before{background:linear-gradient(90deg,#8B5CF6,#EC4899)}
+.prob-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:16px}
+.prob-card.red .prob-icon{background:rgba(239,68,68,.15)}
+.prob-card.gold .prob-icon{background:rgba(245,158,11,.15)}
+.prob-card.blue .prob-icon{background:rgba(59,130,246,.15)}
+.prob-card.purple .prob-icon{background:rgba(139,92,246,.15)}
+.prob-title{font-family:'Syne',sans-serif;font-size:17px;font-weight:700;margin-bottom:8px}
+.prob-desc{font-size:13px;color:var(--gray);line-height:1.6;margin-bottom:16px}
+.prob-impact{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600}
+.prob-card.red .prob-impact{color:var(--red)}
+.prob-card.gold .prob-impact{color:var(--gold)}
+.prob-card.blue .prob-impact{color:var(--blue-light)}
+.prob-card.purple .prob-impact{color:#A78BFA}
+
+/* CHARTS ROW */
+.charts-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:24px;margin-bottom:24px}
+.chart-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px}
+.chart-card.wide{grid-column:span 2}
+.chart-title{font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-bottom:4px}
+.chart-sub{font-size:12px;color:var(--gray);margin-bottom:20px}
+.chart-wrap{position:relative;height:200px}
+
+/* BENCHMARKING */
+.bench-table{width:100%;border-collapse:collapse;margin-top:8px}
+.bench-table th{font-size:11px;color:var(--gray);text-transform:uppercase;letter-spacing:.08em;font-weight:500;padding:10px 16px;text-align:left;border-bottom:1px solid var(--border)}
+.bench-table td{padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.04);font-size:13px;vertical-align:middle}
+.bench-table tr:last-child td{border-bottom:none}
+.bench-table tr:hover td{background:rgba(255,255,255,.03)}
+.tool-name-cell{display:flex;align-items:center;gap:10px}
+.tool-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.check{color:var(--green);font-size:15px}
+.cross{color:rgba(255,255,255,.2);font-size:15px}
+.partial{color:var(--gold);font-size:13px;font-weight:600}
+.score-pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
+.score-high{background:rgba(16,185,129,.2);color:#34D399}
+.score-med{background:rgba(245,158,11,.2);color:#FCD34D}
+.score-low{background:rgba(239,68,68,.2);color:#FCA5A5}
+
+/* SOLUTION */
+.solution-layout{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
+.solution-feature{display:flex;gap:16px;margin-bottom:28px}
+.sol-icon{width:40px;height:40px;border-radius:10px;background:rgba(6,182,212,.15);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;margin-top:2px}
+.sol-title{font-weight:600;font-size:15px;margin-bottom:4px}
+.sol-desc{font-size:13px;color:var(--gray);line-height:1.6}
+.solution-visual{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:32px;position:relative;overflow:hidden}
+.solution-visual::before{content:'';position:absolute;top:-60px;right:-60px;width:200px;height:200px;background:radial-gradient(circle,rgba(6,182,212,.15),transparent 70%)}
+.output-block{background:rgba(0,0,0,.3);border-radius:12px;padding:20px;margin-bottom:16px;border:1px solid rgba(6,182,212,.15)}
+.output-tag{font-size:10px;color:var(--cyan);font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px}
+.output-line{display:flex;align-items:center;gap-8px;font-size:13px;margin-bottom:6px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.output-line:last-child{border-bottom:none;margin-bottom:0}
+.output-label{color:var(--gray);font-size:12px;width:140px;flex-shrink:0}
+.output-val{color:var(--white);font-size:12px;font-weight:500;flex:1}
+.output-badge{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600;margin-left:auto}
+.badge-red{background:rgba(239,68,68,.2);color:#FCA5A5}
+.badge-green{background:rgba(16,185,129,.2);color:#34D399}
+.badge-gold{background:rgba(245,158,11,.2);color:#FCD34D}
+
+/* RECOMMENDATION */
+.rec-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.rec-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:28px;text-align:center;transition:.3s}
+.rec-card:hover{border-color:var(--cyan);transform:translateY(-4px)}
+.rec-step{font-family:'Syne',sans-serif;font-size:48px;font-weight:800;color:rgba(6,182,212,.2);line-height:1;margin-bottom:12px}
+.rec-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:8px}
+.rec-desc{font-size:13px;color:var(--gray);line-height:1.6}
+
+/* FOOTER */
+footer{padding:40px 48px;border-top:1px solid var(--border);text-align:center}
+.footer-text{font-size:13px;color:var(--gray)}
+.footer-text span{color:var(--cyan);font-weight:600}
+
+/* DIVIDER */
+.divider{height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);margin:0 48px}
+
+/* ANIMATE */
+.fade-up{opacity:0;transform:translateY(30px);transition:opacity .6s ease,transform .6s ease}
+.fade-up.visible{opacity:1;transform:translateY(0)}
+</style>
+</head>
+<body>
+
+<div class="bg-grid"></div>
+<div class="bg-glow"></div>
+<div class="bg-glow2"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-logo">
+    <div class="nav-dot"></div>
+    TPS<span> HR</span>
+  </div>
+  <div class="nav-links">
+    <a href="#problems">Challenges</a>
+    <a href="#data">Data</a>
+    <a href="#benchmarking">Benchmarking</a>
+    <a href="#solution">Solution</a>
+  </div>
+  <div class="nav-badge">AI-Powered Analysis</div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="container">
+    <div class="hero-layout">
+      <div class="hero-content fade-up">
+        <div class="hero-tag">TPS · Tech Process Solutions — HR AI Initiative</div>
+        <h1 class="hero-title">
+          Smarter Hiring<br>
+          <span class="line2">Starts Here.</span>
+        </h1>
+        <p class="hero-subtitle">At TPS, HR is facing two confirmed challenges: job descriptions that don't differentiate between seniority levels — and a manual resume review process that can't keep up with volume. This report diagnoses both problems, benchmarks available AI tools, and presents what we built to address them.</p>
+        <div class="hero-stats">
+          <div class="hstat">
+            <div class="hstat-num">52<span>%</span></div>
+            <div class="hstat-label">Of bad hires linked to unclear JDs</div>
+            <div style="font-size:10px;color:#475569;margin-top:4px">Source: SHRM Global Research</div>
+          </div>
+          <div class="hstat">
+            <div class="hstat-num">23<span>hrs</span></div>
+            <div class="hstat-label">Avg. spent screening per open role</div>
+            <div style="font-size:10px;color:#475569;margin-top:4px">Source: LinkedIn Talent Trends Report</div>
+          </div>
+          <div class="hstat">
+            <div class="hstat-num">88<span>%</span></div>
+            <div class="hstat-label">Of received CVs are unqualified</div>
+            <div style="font-size:10px;color:#475569;margin-top:4px">Source: Glassdoor Recruiting Survey</div>
+          </div>
+        </div>
+        <div class="hero-cta">
+          <a href="#problems" class="btn-primary">Explore Challenges →</a>
+          <a href="#solution" class="btn-outline">View Our Solution</a>
+        </div>
+      </div>
+      <div class="hero-visual fade-up">
+        <div class="hero-card">
+          <div class="hero-card-title">📌 HR Pain Points at TPS</div>
+          <div class="mini-bar">
+            <div class="mbar-row"><span class="mbar-label" style="width:130px">JD Clarity Gap</span><div class="mbar-track"><div class="mbar-fill" style="width:100%;background:linear-gradient(90deg,#EF4444,#F97316)"></div></div><span class="mbar-val" style="color:#EF4444;width:70px">Confirmed</span></div>
+            <div class="mbar-row"><span class="mbar-label" style="width:130px">Screening Overload</span><div class="mbar-track"><div class="mbar-fill" style="width:100%;background:linear-gradient(90deg,#EF4444,#F97316)"></div></div><span class="mbar-val" style="color:#EF4444;width:70px">Confirmed</span></div>
+            <div class="mbar-row"><span class="mbar-label" style="width:130px">Onboarding Gaps</span><div class="mbar-track"><div class="mbar-fill" style="width:60%;background:linear-gradient(90deg,#F59E0B,#FCD34D)"></div></div><span class="mbar-val" style="color:#F59E0B;width:70px">Suggested</span></div>
+            <div class="mbar-row"><span class="mbar-label" style="width:130px">Engagement</span><div class="mbar-track"><div class="mbar-fill" style="width:60%;background:linear-gradient(90deg,#F59E0B,#FCD34D)"></div></div><span class="mbar-val" style="color:#F59E0B;width:70px">Suggested</span></div>
+            <div class="mbar-row"><span class="mbar-label" style="width:130px">KPI Frameworks</span><div class="mbar-track"><div class="mbar-fill" style="width:60%;background:linear-gradient(90deg,#3B82F6,#06B6D4)"></div></div><span class="mbar-val" style="color:#3B82F6;width:70px">Suggested</span></div>
+          </div>
+          <div style="margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,.07);font-size:11px;color:#475569">Confirmed = identified at TPS &nbsp;·&nbsp; Suggested = industry-common risks</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- PROBLEMS -->
+<section id="problems">
+  <div class="container">
+    <div class="fade-up">
+      <div class="sec-label">The Challenges</div>
+      <h2 class="sec-title">HR Problems<br>We're Addressing</h2>
+      <p class="sec-desc">Two challenges are confirmed at TPS. The remaining three are common HR pain points observed across the industry — included as a broader view for consideration.</p>
+    </div>
+    <div style="font-size:12px;color:var(--gray);margin-bottom:20px;display:flex;gap:20px;flex-wrap:wrap">
+      <span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;background:var(--red);border-radius:50%;display:inline-block"></span> Confirmed at TPS</span>
+      <span style="display:flex;align-items:center;gap:6px"><span style="width:10px;height:10px;background:var(--gold);border-radius:50%;display:inline-block"></span> Suggested — industry-common risk</span>
+    </div>
+    <div class="problems-grid">
+
+      <div class="prob-card red fade-up">
+        <div class="prob-icon">📄</div>
+        <div class="prob-title">Poor Job Descriptions</div>
+        <div class="prob-desc">At TPS, BA roles (Level 1/2/3) and seniority levels share near-identical JDs with no clear differentiation in responsibilities, expectations, or KPIs. This leads to mismatched applicants from the start.</div>
+        <div class="prob-impact">⚠ Confirmed at TPS — affects every hiring cycle</div>
+      </div>
+
+      <div class="prob-card red fade-up">
+        <div class="prob-icon">⏱</div>
+        <div class="prob-title">Manual & Slow Screening</div>
+        <div class="prob-desc">HR receives a high volume of resumes and reviews them manually. With no automation, the right candidate can be missed simply due to the scale of applications — not lack of qualification.</div>
+        <div class="prob-impact">⚠ Confirmed at TPS — high volume, manual effort</div>
+      </div>
+
+      <div class="prob-card gold fade-up">
+        <div class="prob-icon">🚪</div>
+        <div class="prob-title">Weak Onboarding Experience</div>
+        <div class="prob-desc">Without a structured onboarding program, new hires often lack clarity on their role, tools, and expectations in the first weeks. This increases early attrition risk and slows time-to-productivity.</div>
+        <div class="prob-impact">⚡ Suggested — common across growing tech teams</div>
+      </div>
+
+      <div class="prob-card gold fade-up">
+        <div class="prob-icon">📉</div>
+        <div class="prob-title">Low Employee Engagement Visibility</div>
+        <div class="prob-desc">HR teams without regular pulse surveys or feedback mechanisms have limited visibility into team morale — making it hard to act before issues escalate into turnover.</div>
+        <div class="prob-impact">⚡ Suggested — often invisible until it's too late</div>
+      </div>
+
+      <div class="prob-card blue fade-up">
+        <div class="prob-icon">🎯</div>
+        <div class="prob-title">No KPI Framework for Roles</div>
+        <div class="prob-desc">BA and analyst roles at many organizations lack defined, measurable KPIs tied to the job description. Performance reviews become subjective and inconsistent across managers and cycles.</div>
+        <div class="prob-impact">📊 Suggested — directly tied to the JD problem above</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- DATA / CHARTS -->
+<section id="data">
+  <div class="container">
+    <div class="fade-up">
+      <div class="sec-label">Industry Research</div>
+      <h2 class="sec-title">What the Data Says</h2>
+      <p class="sec-desc">Numbers from published research that put the two TPS challenges in a broader industry context. All figures are sourced and linked below.</p>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px" class="fade-up">
+
+      <div class="chart-card" style="padding:28px">
+        <div style="font-size:13px;color:var(--cyan);font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">Job Descriptions</div>
+        <div style="font-family:'Syne',sans-serif;font-size:48px;font-weight:800;line-height:1;margin-bottom:8px">52<span style="font-size:28px;color:var(--cyan)">%</span></div>
+        <div style="font-size:14px;color:var(--white);font-weight:500;margin-bottom:6px">Of bad hires are linked to unclear or inaccurate job descriptions</div>
+        <div style="font-size:11px;color:#475569;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">SHRM — Talent Acquisition Research</div>
+      </div>
+
+      <div class="chart-card" style="padding:28px">
+        <div style="font-size:13px;color:var(--cyan);font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">Resume Screening</div>
+        <div style="font-family:'Syne',sans-serif;font-size:48px;font-weight:800;line-height:1;margin-bottom:8px">23<span style="font-size:28px;color:var(--cyan)">hrs</span></div>
+        <div style="font-size:14px;color:var(--white);font-weight:500;margin-bottom:6px">Average time spent by HR screening resumes per open role</div>
+        <div style="font-size:11px;color:#475569;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">LinkedIn — Global Talent Trends Report</div>
+      </div>
+
+      <div class="chart-card" style="padding:28px">
+        <div style="font-size:13px;color:var(--cyan);font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">Application Quality</div>
+        <div style="font-family:'Syne',sans-serif;font-size:48px;font-weight:800;line-height:1;margin-bottom:8px">88<span style="font-size:28px;color:var(--cyan)">%</span></div>
+        <div style="font-size:14px;color:var(--white);font-weight:500;margin-bottom:6px">Of resumes received for a role are considered unqualified by recruiters</div>
+        <div style="font-size:11px;color:#475569;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">Glassdoor — Recruiting & Hiring Survey</div>
+      </div>
+
+      <div class="chart-card" style="padding:28px">
+        <div style="font-size:13px;color:var(--cyan);font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px">AI in HR</div>
+        <div style="font-family:'Syne',sans-serif;font-size:48px;font-weight:800;line-height:1;margin-bottom:8px">2.1<span style="font-size:28px;color:var(--cyan)">M</span></div>
+        <div style="font-size:14px;color:var(--white);font-weight:500;margin-bottom:6px">Employee HR conversations per year handled by IBM's AI-powered AskHR — with 94% resolved instantly</div>
+        <div style="font-size:11px;color:#475569;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">IBM — watsonx Orchestrate Case Study</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- BENCHMARKING -->
+<section id="benchmarking">
+  <div class="container">
+    <div class="fade-up">
+      <div class="sec-label">Tool Benchmarking</div>
+      <h2 class="sec-title">How AI Tools Compare</h2>
+      <p class="sec-desc">A detailed feature-by-feature evaluation of 4 leading HR AI tools — mapped against the exact capabilities that matter most.</p>
+    </div>
+
+    <!-- Tool legend -->
+    <div class="fade-up" style="display:flex;gap:24px;flex-wrap:wrap;margin-bottom:24px">
+      <div style="display:flex;align-items:center;gap:8px"><div class="tool-dot" style="background:#1D4ED8;width:12px;height:12px;border-radius:50%"></div><span style="font-size:13px;font-weight:600">watsonx Orchestrate</span><span style="font-size:11px;color:var(--gray)">IBM · HR Workflow Automation</span></div>
+      <div style="display:flex;align-items:center;gap:8px"><div class="tool-dot" style="background:#10B981;width:12px;height:12px;border-radius:50%"></div><span style="font-size:13px;font-weight:600">Talenteria</span><span style="font-size:11px;color:var(--gray)">Talent Acquisition</span></div>
+      <div style="display:flex;align-items:center;gap:8px"><div class="tool-dot" style="background:#8B5CF6;width:12px;height:12px;border-radius:50%"></div><span style="font-size:13px;font-weight:600">Leena AI</span><span style="font-size:11px;color:var(--gray)">Employee Engagement</span></div>
+      <div style="display:flex;align-items:center;gap:8px"><div class="tool-dot" style="background:#F59E0B;width:12px;height:12px;border-radius:50%"></div><span style="font-size:13px;font-weight:600">Macorva</span><span style="font-size:11px;color:var(--gray)">Performance Management</span></div>
+    </div>
+
+    <div class="chart-card fade-up" style="margin-bottom:24px">
+      <div class="chart-title">Capability Radar by Tool</div>
+      <div class="chart-sub">A quick visual summary across six major HR capability clusters based on the comparison table below</div>
+      <div class="chart-wrap" style="height:340px"><canvas id="chartBenchmarkRadar"></canvas></div>
+    </div>
+
+    <div class="chart-card fade-up" style="overflow-x:auto;padding:0">
+      <table class="bench-table" style="min-width:900px">
+        <thead>
+          <tr>
+            <th style="width:220px;padding:14px 20px">Feature / Capability</th>
+            <th style="text-align:center"><div style="display:flex;align-items:center;justify-content:center;gap:6px"><div style="width:8px;height:8px;border-radius:50%;background:#1D4ED8"></div>watsonx</div></th>
+            <th style="text-align:center"><div style="display:flex;align-items:center;justify-content:center;gap:6px"><div style="width:8px;height:8px;border-radius:50%;background:#10B981"></div>Talenteria</div></th>
+            <th style="text-align:center"><div style="display:flex;align-items:center;justify-content:center;gap:6px"><div style="width:8px;height:8px;border-radius:50%;background:#8B5CF6"></div>Leena AI</div></th>
+            <th style="text-align:center"><div style="display:flex;align-items:center;justify-content:center;gap:6px"><div style="width:8px;height:8px;border-radius:50%;background:#F59E0B"></div>Macorva</div></th>
+          </tr>
+        </thead>
+        <tbody>
+
+          <!-- SECTION: JD & RECRUITMENT -->
+          <tr><td colspan="5" style="background:rgba(29,78,216,.15);padding:8px 20px;font-size:11px;font-weight:700;color:#60A5FA;letter-spacing:.1em;text-transform:uppercase">📄 Job Description &amp; Recruitment</td></tr>
+
+          <tr>
+            <td style="padding:12px 20px;font-size:13px;color:var(--gray)">JD Writing / Generation</td>
+            <td style="text-align:center"><span class="check" title="AI drafts JDs via conversational interface">✔</span></td>
+            <td style="text-align:center"><span class="check" title="Generates JDs, interview questions & candidate emails">✔</span></td>
+            <td style="text-align:center"><span class="cross">—</span></td>
+            <td style="text-align:center"><span class="cross">—</span></td>
+          </tr>
+          <tr>
+            <td style="padding:12px 20px;font-size:13px;color:var(--gray)">Resume Screening &amp; Ranking</td>
+            <td style="text-align:center"><span class="check" title="Automates sourcing, screening & shortlisting via AI agents">✔</span></td>
+            <td style="text-align:center"><span class="check" title="AI scores & ranks resumes by skills, experience & education; multi-language">✔</span></td>
+            <td style="text-align:center"><span class="cross">—</span></td>
+            <td style="text-align:center"><span class="cross">—</span></td>
+          </tr>
+          <tr>
+            <td style="padding:12px 20px;font-size:13px;color:var(--gray)">Interview Scheduling</td>
+            <td style="text-align:center"><span class="check" title="AI agents schedule interviews automatically">✔</span></td>
+            <td style="text-align:center"><span class="check" title="Automated scheduling; AI-led video & voice interviews 24/7 in 50+ languages">✔</span></td>
+            <td style="text-align:center"><span class="cross">—</span></td>
+            <td style="text-align:center"><span class="cross">—</span></td>
+          </tr>
+          <tr>
+            <td style="padding:12px 20px;font-size:13px;color:var(--gray)">Talent Pool Management</td>
+            <td style="text-align:center"><span class="cross">—</span></td>
+            <td style="text-align:center"><span class="check" title="AI-driven talent pools; natural-language candidate search; auto-matching to new openings">✔</span></td>
+            <td style="text-align:center"><span class="cross">—</span></td>
+            <td style="text-align:center"><span class="cross">—</span></td>
+          </tr>
+
+          <!-- SECTION: ONBOARDING & EMPLOYEE SUPPORT -->
+          <tr><td colspan="5" style="background:rgba(139,92,246,.15);padding:8px 20px;font-size:11px;font-weight:700;color:#A78BFA;letter-spacing:.1em;text-transform:uppercase">🚪 Onboarding &amp; Employee Support</td></tr>
+
+          <tr>
+            <td style="padding:12px 20px;font-size:13px;color:var(--gray)">Onboarding Automation</td>
+            <td style="text-align:center"><span class="check" title="Pre-built HR agents handle onboarding workflows end-to-end">✔</span></td>
+            <td style="text-align:center"><span class="partial" title="Onboarding surveys & AI chatbot support for new hires">Partial</span></td>
+            <td style="text-align:center"><span class="check" title="Automates onboarding tasks & ticket handling; integrates with HRIS">✔</span></td>
+            <td style="text-align:center"><span class="partial" title="Auto-detects new employees & sends onboarding surveys">Partial</span></td>
+          </tr>
+          <tr>
+            <td style="padding:12px 20px;font-size:13px;color:var(--gray)">HR Chatbot / Virtual Assistant</td>
+            <td style="text-align:center"><span class="check" title="Conversational AI agents answer HR questions, manage leave, retrieve payslips 24/7">✔</span></td>
+            <td style="text-align:center"><span class="check" title="Recruitment chatbot supports candidates 24/7 via OpenAI integration">✔</span></td>
+            <td style="text-align:center"><span class="check" title="AI virtual assistant resolves 70%+ HR queries; supports 100+ languages">✔</span></td>
+            <td style="text-align:center"><span class="cross">—</span></td>
+          </tr>
+          <tr>
+            <td style="padding:12px 20px;font-size:13px;color:var(--gray)">HR Ticketing &amp; Case Management</td>
+            <td style="text-align:center"><span class="check" title="Routes and resolves HR requests across enterprise systems">✔</span></td>
+            <td style="text-align:center"><span class="cross">—</span></td>
+            <td style="text-align:center"><span class="check" title="Full case management dashboard; real-time ticketing & auto-resolution">✔</span></td>
+            <td style="text-align:center"><span class="cross">—</span></td>
+          </tr>
+
+          <!-- SECTION: PERFORMANCE & DEVELOPMENT -->
+          <tr><td colspan="5" style="background:rgba(245,158,11,.12);padding:8px 20px;font-size:11px;font-weight:700;color:#FCD34D;letter-spacing:.1em;text-transform:uppercase">🎯 Performance &amp; Development</td></tr>
+
+          <tr>
+            <td style="padding:12px 20px;font-size:13px;color:var(--gray)">Performance Reviews</td>
+            <td style="text-align:center"><span class="check" title="AI agents support goal-setting, feedback & appraisal workflows">✔</span></td>
+            <td style="text-align:center"><span class="cross">—</span></td>
+            <td style="text-align:center"><span class="partial" title="Limited — focused on surveys rather than structured reviews">Partial</span></td>
+            <td style="text-align:center"><span class="check" title="AI generates performance review drafts; bias risk analysis (Radiant AI); 360° feedback">✔</span></td>
+          </tr>
+          <tr>
+            <td style="padding:12px 20px;font-size:13px;color:var(--gray)">Development Plans &amp; Goals (OKR/SMART)</td>
+            <td style="text-align:center"><span class="check" title="Continuous feedback & personalized learning workflows">✔</span></td>
+            <td style="text-align:center"><span class="cross">—</span></td>
+            <td style="text-align:center"><span class="cross">—</span></td>
+            <td style="text-align:center"><span class="check" title="AI-generated OKRs, SMART goals, PIPs & personalized learning plans">✔</span></td>
+          </tr>
+          <tr>
+            <td style="padding:12px 20px;font-size:13px;color:var(--gray)">Manager Coaching &amp; Enablement</td>
+            <td style="text-align:center"><span class="cross">—</span></td>
+            <td style="text-align:center"><span class="cross">—</span></td>
+            <td style="text-align:center"><span class="cross">—</span></td>
+            <td style="text-align:center"><span class="check" title="Macorva MX: AI coaching tailored to each manager's team data & 1:1 notes">✔</span></td>
+          </tr>
+
+          <!-- SECTION: ENGAGEMENT & ANALYTICS -->
+          <tr><td colspan="5" style="background:rgba(16,185,129,.1);padding:8px 20px;font-size:11px;font-weight:700;color:#34D399;letter-spacing:.1em;text-transform:uppercase">📊 Engagement &amp; Analytics</td></tr>
+
+          <tr>
+            <td style="padding:12px 20px;font-size:13px;color:var(--gray)">Employee Engagement Surveys</td>
+            <td style="text-align:center"><span class="cross">—</span></td>
+            <td style="text-align:center"><span class="check" title="AI survey tool for onboarding, learning & exit feedback; sentiment analysis">✔</span></td>
+            <td style="text-align:center"><span class="check" title="Pulse surveys, lifecycle surveys; conversational format; attrition prediction">✔</span></td>
+            <td style="text-align:center"><span class="check" title="Mobile-first surveys; generates personalized engagement reports per manager">✔</span></td>
+          </tr>
+          <tr>
+            <td style="padding:12px 20px;font-size:13px;color:var(--gray)">AI Analytics &amp; Insights Dashboard</td>
+            <td style="text-align:center"><span class="check" title="Cross-system analytics; agent performance monitoring; compliance audit trail">✔</span></td>
+            <td style="text-align:center"><span class="check" title="Candidate analytics: screening scores, interview performance, hire benchmarking">✔</span></td>
+            <td style="text-align:center"><span class="check" title="Real-time engagement dashboard; sentiment analysis; query trend analytics">✔</span></td>
+            <td style="text-align:center"><span class="check" title="Radiant AI® generates personalized dashboards; tracks team survey & feedback trends">✔</span></td>
+          </tr>
+          <tr>
+            <td style="padding:12px 20px;font-size:13px;color:var(--gray)">Integrations</td>
+            <td style="text-align:center"><span class="partial" title="700+ enterprise systems incl. Workday, SAP, Oracle, Salesforce, MS Teams, Slack">700+</span></td>
+            <td style="text-align:center"><span class="partial" title="60+ ATS platforms; Azure hosted; GDPR, CCPA, SOC 2 compliant">60+ ATS</span></td>
+            <td style="text-align:center"><span class="partial" title="HRIS/HRMS, LMS, ERP, SharePoint, MS Teams, Slack; 100+ languages">HRIS/LMS</span></td>
+            <td style="text-align:center"><span class="partial" title="HRIS, CRM, ADP; hourly data sync; Slack & MS Teams">HRIS/ADP</span></td>
+          </tr>
+
+          <!-- OVERALL -->
+          <tr style="border-top:2px solid rgba(255,255,255,.1)">
+            <td style="padding:14px 20px;font-size:13px;font-weight:700;color:var(--white)">Overall Fit for HR</td>
+            <td style="text-align:center"><span class="score-pill score-high">Strong</span></td>
+            <td style="text-align:center"><span class="score-pill score-med">Recruitment</span></td>
+            <td style="text-align:center"><span class="score-pill score-med">Support</span></td>
+            <td style="text-align:center"><span class="score-pill score-med">Performance</span></td>
+          </tr>
+
+        </tbody>
+      </table>
+      <div style="padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:24px;flex-wrap:wrap">
+        <span style="font-size:12px;color:var(--gray)"><span class="check">✔</span> Full feature</span>
+        <span style="font-size:12px;color:var(--gray)"><span class="partial">Partial</span> Limited coverage</span>
+        <span style="font-size:12px;color:var(--gray)"><span class="cross">—</span> Not a core feature</span>
+        <span style="font-size:12px;color:var(--gray);margin-left:auto;font-style:italic">Hover over ✔ icons for feature details</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- SOLUTION -->
+<section id="solution">
+  <div class="container">
+    <div class="fade-up">
+      <div class="sec-label">Our Solution</div>
+      <h2 class="sec-title">What We Built &<br>Where It Fits</h2>
+      <p class="sec-desc">We built an AI-powered tool that fills the most critical gap: reviewing, rewriting, and scoring job descriptions — with a full KPI framework attached.</p>
+    </div>
+    <div class="solution-layout fade-up">
+      <div>
+        <div class="solution-feature">
+          <div class="sol-icon">🔍</div>
+          <div><div class="sol-title">JD Quality Analysis</div><div class="sol-desc">Automatically flags vague language, missing requirements, unrealistic expectations, and bias in job descriptions.</div></div>
+        </div>
+        <div class="solution-feature">
+          <div class="sol-icon">✍️</div>
+          <div><div class="sol-title">Clean JD Rewrite</div><div class="sol-desc">Produces a structured, professional JD with clear responsibilities, required vs. preferred qualifications, and inclusive language.</div></div>
+        </div>
+        <div class="solution-feature">
+          <div class="sol-icon">📊</div>
+          <div><div class="sol-title">KPI Framework Generation</div><div class="sol-desc">Outputs a measurable KPI set tailored to the role — covering output quality, delivery timelines, collaboration, and business impact.</div></div>
+        </div>
+        <div class="solution-feature">
+          <div class="sol-icon">📄</div>
+          <div><div class="sol-title">HTML Report Output</div><div class="sol-desc">Everything delivered in a clean, shareable HTML report — no tools to install, no extra steps for HR teams.</div></div>
+        </div>
+      </div>
+      <div class="solution-visual">
+        <div style="font-size:11px;color:var(--cyan);font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:16px">📋 Sample Output — BA Job Description Review</div>
+        <div class="output-block">
+          <div class="output-tag">Issues Detected</div>
+          <div class="output-line" style="display:flex;align-items:center;gap:8px"><span class="output-label">Vague Requirements</span><span class="output-val">3 instances found</span><span class="output-badge badge-red">High</span></div>
+          <div class="output-line" style="display:flex;align-items:center;gap:8px"><span class="output-label">Missing KPIs</span><span class="output-val">No metrics defined</span><span class="output-badge badge-red">High</span></div>
+          <div class="output-line" style="display:flex;align-items:center;gap:8px"><span class="output-label">Bias Language</span><span class="output-val">2 phrases flagged</span><span class="output-badge badge-gold">Med</span></div>
+          <div class="output-line" style="display:flex;align-items:center;gap:8px"><span class="output-label">Structure Score</span><span class="output-val">4 / 10</span><span class="output-badge badge-red">Low</span></div>
+        </div>
+        <div class="output-block">
+          <div class="output-tag">After AI Rewrite</div>
+          <div class="output-line" style="display:flex;align-items:center;gap:8px"><span class="output-label">Clarity Score</span><span class="output-val">9.2 / 10</span><span class="output-badge badge-green">Excellent</span></div>
+          <div class="output-line" style="display:flex;align-items:center;gap:8px"><span class="output-label">KPI Coverage</span><span class="output-val">8 metrics defined</span><span class="output-badge badge-green">Complete</span></div>
+          <div class="output-line" style="display:flex;align-items:center;gap:8px"><span class="output-label">Bias Score</span><span class="output-val">Inclusive language</span><span class="output-badge badge-green">Clear</span></div>
+          <div class="output-line" style="display:flex;align-items:center;gap:8px"><span class="output-label">Ready to Post</span><span class="output-val">Yes</span><span class="output-badge badge-green">✓</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- RECOMMENDATION -->
+<section id="recommendation">
+  <div class="container">
+    <div class="fade-up">
+      <div class="sec-label">Next Steps</div>
+      <h2 class="sec-title">Recommended Path Forward</h2>
+      <p class="sec-desc">A phased approach to embedding AI into HR operations — starting where the pain is highest.</p>
+    </div>
+    <div class="rec-grid fade-up">
+      <div class="rec-card">
+        <div class="rec-step">01</div>
+        <div class="rec-title">Deploy JD Review Tool</div>
+        <div class="rec-desc">Roll out the AI JD reviewer to all hiring managers. Establish a quality benchmark and collect feedback for iteration.</div>
+      </div>
+      <div class="rec-card">
+        <div class="rec-step">02</div>
+        <div class="rec-title">Pilot an HR AI Platform</div>
+        <div class="rec-desc">Run a 90-day pilot with either watsonx Orchestrate or Talenteria to cover screening and onboarding automation.</div>
+      </div>
+      <div class="rec-card">
+        <div class="rec-step">03</div>
+        <div class="rec-title">Expand to Engagement & KPIs</div>
+        <div class="rec-desc">Integrate Macorva or Leena AI for pulse surveys and performance tracking. Build a full-cycle AI HR stack.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-text">Prepared by <span>Maram Eleemat</span> · TPS HR AI Initiative &nbsp;|&nbsp; Sources: SHRM · LinkedIn Talent Trends · Glassdoor · IBM watsonx</div>
+</footer>
+
+<script>
+// Benchmark Radar chart — scores derived from feature table (1=none, 5=full)
+new Chart(document.getElementById('chartBenchmarkRadar'), {
+  type: 'radar',
+  data: {
+    labels: ['Recruitment', 'Onboarding', 'Employee Support', 'Performance', 'Engagement', 'Integrations'],
+    datasets: [
+      {
+        label: 'watsonx Orchestrate',
+        data: [4, 4, 5, 4, 2, 5],
+        borderColor: '#1D4ED8',
+        backgroundColor: 'rgba(29,78,216,.14)',
+        pointBackgroundColor: '#1D4ED8',
+        pointRadius: 3
+      },
+      {
+        label: 'Talenteria',
+        data: [5, 3, 2, 1, 3, 4],
+        borderColor: '#10B981',
+        backgroundColor: 'rgba(16,185,129,.12)',
+        pointBackgroundColor: '#10B981',
+        pointRadius: 3
+      },
+      {
+        label: 'Leena AI',
+        data: [1, 4, 5, 2, 5, 4],
+        borderColor: '#8B5CF6',
+        backgroundColor: 'rgba(139,92,246,.10)',
+        pointBackgroundColor: '#8B5CF6',
+        pointRadius: 3
+      },
+      {
+        label: 'Macorva',
+        data: [1, 2, 1, 5, 5, 3],
+        borderColor: '#F59E0B',
+        backgroundColor: 'rgba(245,158,11,.10)',
+        pointBackgroundColor: '#F59E0B',
+        pointRadius: 3
+      }
+    ]
+  },
+  options: {
+    plugins: {
+      legend: { position: 'top', labels: { color: '#94A3B8', font: { size: 10 }, padding: 12 } }
+    },
+    scales: {
+      r: {
+        min: 0, max: 5,
+        ticks: { stepSize: 1, color: '#94A3B8', backdropColor: 'transparent', showLabelBackdrop: false },
+        grid: { color: 'rgba(255,255,255,.08)' },
+        angleLines: { color: 'rgba(255,255,255,.08)' },
+        pointLabels: { color: '#F8FAFF', font: { size: 11, family: 'DM Sans' } }
+      }
+    },
+    elements: { line: { borderWidth: 2 } },
+    maintainAspectRatio: false
+  }
+});
+
+// SCROLL ANIMATIONS
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.1 });
+document.querySelectorAll('.fade-up').forEach(el => obs.observe(el));
+</script>
+</body>
+</html>
